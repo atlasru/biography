@@ -85,6 +85,26 @@ h1 {
     font-weight: 300;
 }
 
+.music-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px);
+    color: white;
+    padding: 10px 16px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all .25s ease;
+    z-index: 1000;
+}
+
+.music-toggle:hover {
+    background: rgba(255,255,255,0.12);
+}
+
 .cards-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -230,6 +250,14 @@ footer {
 </head>
 
 <body>
+
+<!-- Audio -->
+<audio id="bgMusic" loop>
+    <source src="https://raw.githubusercontent.com/atlasru/biography/main/music.mp3" type="audio/mpeg">
+</audio>
+
+<button class="music-toggle" id="musicBtn">🔊 Music</button>
+
 <div class="container">
 
 <header>
@@ -308,5 +336,35 @@ footer {
 </footer>
 
 </div>
+
+<script>
+const music = document.getElementById('bgMusic');
+const btn = document.getElementById('musicBtn');
+let isPlaying = false;
+
+// autoplay attempt (works after first interaction in most browsers)
+window.addEventListener('click', () => {
+    if (!isPlaying) {
+        music.volume = 0.4;
+        music.play().then(() => {
+            isPlaying = true;
+            btn.textContent = '🔊 Music';
+        }).catch(()=>{});
+    }
+}, { once: true });
+
+btn.addEventListener('click', () => {
+    if (isPlaying) {
+        music.pause();
+        btn.textContent = '🔈 Music Off';
+        isPlaying = false;
+    } else {
+        music.play();
+        btn.textContent = '🔊 Music';
+        isPlaying = true;
+    }
+});
+</script>
+
 </body>
 </html>
