@@ -35,13 +35,12 @@ body {
     overflow-x: hidden;
 }
 
-/* ENTER OVERLAY */
+<!-- нет это не ии хахаха ты че тупой -->
 .enter-overlay {
     position: fixed;
     inset: 0;
     background: rgba(10,10,15,0.65);
     backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -287,12 +286,12 @@ footer {
 
 <body>
 
-<!-- ENTER SCREEN -->
+
 <div class="enter-overlay" id="enterOverlay">
     <button class="enter-button" id="enterBtn">ENTER</button>
 </div>
 
-<!-- Audio -->
+
 <audio id="bgMusic" loop>
     <source src="https://raw.githubusercontent.com/atlasru/biography/main/music.mp3" type="audio/mpeg">
 </audio>
@@ -323,6 +322,12 @@ footer {
             <div class="project-name">XSIA Mailer</div>
             <div class="project-desc">Automated email sending service</div>
             <span>@xsiamailerbot</span>
+        </div>
+
+        <div class="project-item">
+            <div class="project-name">GhostSearch</div>
+            <div class="project-desc">OSINT search tool for agile open-source investigations</div>
+            <a href="https://v0-ghost-search.vercel.app/" target="_blank">v0-ghost-search.vercel.app</a>
         </div>
 
         <div class="project-item">
