@@ -1,200 +1,301 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Atlas | Terminal</title>
+<title>Atlas | OSINT Specialist</title>
 
 <style>
-    :root {
-        --bg: #050508;
-        --cmd-green: #00ff41;
-        --cmd-blue: #0087ff;
-        --text-dim: rgba(0, 255, 65, 0.6);
-    }
+:root {
+    --bg: #050508;
+    --glass: rgba(255, 255, 255, 0.03);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --accent: #7878ff; /* Your signature blue */
+    --text: #ffffff;
+    --text-soft: rgba(255, 255, 255, 0.6);
+    --radius: 16px;
+}
 
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
+* { margin: 0; padding: 0; box-sizing: border-box; cursor: crosshair; }
 
-    body {
-        background-color: var(--bg);
-        color: var(--cmd-green);
-        font-family: 'Courier New', Courier, monospace;
-        padding: 20px;
-        height: 100vh;
-        overflow: hidden; 
-        display: flex;
-        flex-direction: column;
-    }
+body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    /* Cyber Grid Background */
+    background-image: 
+        linear-gradient(rgba(120, 120, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(120, 120, 255, 0.05) 1px, transparent 1px);
+    background-size: 50px 50px;
+    background-position: center;
+}
 
-    
-    body::before {
-        content: " ";
-        display: block;
-        position: absolute;
-        top: 0; left: 0; bottom: 0; right: 0;
-        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
-                    linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-        z-index: 2;
-        background-size: 100% 2px, 3px 100%;
-        pointer-events: none;
-    }
+/* Moving scanline effect */
+body::after {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+    z-index: 999;
+    background-size: 100% 2px, 3px 100%;
+    pointer-events: none;
+    opacity: 0.3;
+}
 
-    #terminal {
-        flex: 1;
-        overflow-y: auto;
-        padding-bottom: 20px;
-        scrollbar-width: none; 
-    }
+.enter-overlay {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    transition: transform 0.8s cubic-bezier(0.87, 0, 0.13, 1);
+}
 
-    #terminal::-webkit-scrollbar { display: none; }
+.enter-overlay.hidden { transform: translateY(-100%); }
 
-    .line { margin-bottom: 5px; min-height: 1.2em; white-space: pre-wrap; }
-    .command-output { color: #ffffff; margin-bottom: 10px; }
-    .error { color: #ff5555; }
-    .system { color: var(--cmd-blue); }
+.enter-button {
+    padding: 20px 60px;
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-size: 1rem;
+    letter-spacing: 5px;
+    transition: 0.4s;
+    position: relative;
+    overflow: hidden;
+}
 
-    .input-area {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        background: var(--bg);
-        position: relative;
-        z-index: 3;
-    }
+.enter-button:hover {
+    background: var(--accent);
+    color: white;
+    box-shadow: 0 0 30px var(--accent);
+}
 
-    .prompt { color: var(--cmd-blue); font-weight: bold; }
+.music-toggle {
+    position: fixed;
+    top: 25px; right: 25px;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    padding: 8px 15px;
+    border-radius: 4px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: white;
+    z-index: 1000;
+}
 
-    #user-input {
-        background: transparent;
-        border: none;
-        color: var(--cmd-green);
-        font-family: inherit;
-        font-size: 1rem;
-        outline: none;
-        width: 100%;
-    }
+.container {
+    max-width: 1000px;
+    margin: auto;
+    padding: 60px 20px;
+    position: relative;
+    z-index: 1;
+}
 
-    .enter-overlay {
-        position: fixed;
-        inset: 0;
-        background: black;
-        z-index: 9999;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+header { text-align: center; margin-bottom: 80px; }
 
-    .enter-overlay.hidden { display: none; }
+.profile-icon {
+    width: 100px; height: 100px;
+    margin: 0 auto 20px;
+    border: 1px solid var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 40px;
+    background: rgba(120, 120, 255, 0.1);
+    box-shadow: 0 0 20px rgba(120, 120, 255, 0.2);
+}
 
-    .boot-btn {
-        background: transparent;
-        border: 1px solid var(--cmd-green);
-        color: var(--cmd-green);
-        padding: 15px 30px;
-        cursor: pointer;
-        font-family: inherit;
-    }
+h1 { font-size: 3.5rem; text-transform: uppercase; letter-spacing: 8px; margin-bottom: 10px; }
+.subtitle { color: var(--accent); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 4px; }
 
-    .boot-btn:hover { background: var(--cmd-green); color: black; }
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    padding: 30px;
+    transition: 0.3s;
+    position: relative;
+}
+
+.card::before {
+    content: ""; position: absolute; top: -1px; left: -1px; width: 0; height: 0;
+    border-top: 1px solid var(--accent); border-left: 1px solid var(--accent);
+    transition: 0.5s;
+}
+
+.card:hover::before { width: 30px; height: 30px; }
+
+.card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(120, 120, 255, 0.4);
+}
+
+.card-title { font-size: 0.8rem; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 25px; }
+
+.project { margin-bottom: 25px; }
+.project-name { font-size: 1.1rem; font-weight: bold; display: block; }
+.project-desc { color: var(--text-soft); font-size: 0.85rem; }
+.project-link { font-size: 0.8rem; color: var(--accent); border-bottom: none; }
+
+.contact-item { margin-bottom: 15px; }
+.contact-label { font-size: 0.7rem; text-transform: uppercase; color: var(--text-soft); }
+.contact-value { font-family: monospace; font-size: 0.9rem; color: #fff; cursor: pointer; }
+.contact-value:hover { color: var(--accent); }
+
+.skills {
+    margin-top: 20px;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    padding: 40px;
+}
+
+.skill-list { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.skill {
+    padding: 5px 15px;
+    border: 1px solid var(--glass-border);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    transition: 0.3s;
+}
+.skill:hover { border-color: var(--accent); color: var(--accent); }
+
+footer { text-align: center; margin-top: 100px; color: var(--text-soft); font-size: 10px; text-transform: uppercase; letter-spacing: 2px; }
+
+/* Simple notification for copy */
+#copy-toast {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: var(--accent); color: white; padding: 10px 20px; font-size: 12px;
+    border-radius: 4px; display: none; z-index: 10001;
+}
 </style>
 </head>
+
 <body>
 
 <div class="enter-overlay" id="overlay">
-    <button class="boot-btn" id="boot">INITIALIZE SYSTEM</button>
+    <button class="enter-button" id="enter">INITIALIZE</button>
 </div>
 
 <audio id="music" loop>
     <source src="https://raw.githubusercontent.com/atlasru/biography/main/music.mp3" type="audio/mpeg">
 </audio>
 
-<div id="terminal">
+<div id="copy-toast">Copied to clipboard!</div>
+
+<button class="music-toggle" id="toggle">Audio: Off</button>
+
+<div class="container">
+    <header>
+        <div class="profile-icon">A</div>
+        <h1>Atlas</h1>
+        <p class="subtitle">OSINT & Security Systems</p>
+    </header>
+
+    <div class="cards">
+        <div class="card">
+            <h2 class="card-title">// Repositories</h2>
+            
+            <div class="project">
+                <span class="project-name">GhostSearch</span>
+                <span class="project-desc">Intelligence discovery engine</span><br>
+                <a href="https://v0-ghost-search.vercel.app/" class="project-link" target="_blank">View Deploy _</a>
+            </div>
+
+            <div class="project">
+                <span class="project-name">Kiro</span>
+                <span class="project-desc">AI Pentest Neural Agent</span>
+                <span class="project-desc" style="display:block; opacity: 0.5;">[Status: Encrypted Beta]</span>
+            </div>
+
+            <div class="project">
+                <span class="project-name">GhostChat</span>
+                <span class="project-desc">P2P Secure Layer</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">// Connectivity</h2>
+            
+            <div class="contact-item">
+                <div class="contact-label">Email</div>
+                <div class="contact-value" onclick="copy(this)">a956943@push.tg</div>
+            </div>
+
+            <div class="contact-item">
+                <div class="contact-label">Discord</div>
+                <div class="contact-value" onclick="copy(this)">atlasru</div>
+            </div>
+
+            <div class="contact-item">
+                <div class="contact-label">qTox ID (Click to Copy)</div>
+                <div class="contact-value" style="font-size: 10px; word-break: break-all;" onclick="copy(this)">
+                    25912FF37A4B8A299BA2C77811EA9D1E94769746A3AB877A10C21E94DE63331D7C3289111BC4
+                </div>
+            </div>
+        </div>
     </div>
 
-<div class="input-area">
-    <span class="prompt">atlas@osint:~$</span>
-    <input type="text" id="user-input" autofocus spellcheck="false">
+    <div class="skills">
+        <h2 class="card-title" style="text-align: center;">// Specialized Skills</h2>
+        <div class="skill-list">
+            <span class="skill">OSINT</span>
+            <span class="skill">Network Auditing</span>
+            <span class="skill">Tool Development</span>
+            <span class="skill">Forensics</span>
+            <span class="skill">Privacy Architecture</span>
+        </div>
+    </div>
+
+    <footer>
+        Terminal v2.6 // Est. 2026
+    </footer>
 </div>
 
 <script>
-const terminal = document.getElementById('terminal');
-const input = document.getElementById('user-input');
-const overlay = document.getElementById('overlay');
-const music = document.getElementById('music');
+const music = document.getElementById("music");
+const overlay = document.getElementById("overlay");
+const enter = document.getElementById("enter");
+const toggle = document.getElementById("toggle");
+const toast = document.getElementById("copy-toast");
 
-const COMMANDS = {
-    help: "Available commands:\n- about: Who is Atlas?\n- projects: Current work & repos\n- contact: Connectivity methods\n- music: Toggle background audio\n- clear: Clear the terminal\n- help: Show this menu",
-    about: "Atlas\nOSINT Specialist & Security Researcher\nSpecialization: Digital investigations, automated threat intel, and tool development.",
-    projects: "Active Projects:\n1. GhostSearch - Intelligence discovery engine\n2. GhostChat - P2P Secure Layer\n3. Kiro - AI Pentest Agent (Closed Beta)",
-    contact: "Connectivity:\n- Email: a956943@push.tg\n- Discord: atlasru\n- qTox: 25912FF37A4B8A299BA2C77811EA9D1E94769746A3AB877A10C21E94DE63331D7C3289111BC4",
-    clear: "CLEAR"
+let playing = false;
+
+enter.onclick = () => {
+    music.volume = 0.3;
+    music.play().catch(()=>{});
+    playing = true;
+    toggle.textContent = "Audio: On";
+    overlay.classList.add("hidden");
 };
 
-function addLine(text, type = '') {
-    const line = document.createElement('div');
-    line.className = `line ${type}`;
-    line.innerText = text;
-    terminal.appendChild(line);
-    terminal.scrollTop = terminal.scrollHeight;
-}
-
-function handleCommand(val) {
-    const cmd = val.toLowerCase().trim();
-    addLine(`atlas@osint:~$ ${val}`, 'user-cmd');
-
-    if (cmd === '') return;
-
-    if (cmd === 'clear') {
-        terminal.innerHTML = '';
-        return;
-    }
-
-    if (cmd === 'music') {
-        if (music.paused) {
-            music.play();
-            addLine("Audio stream initialized.", "system");
-        } else {
-            music.pause();
-            addLine("Audio stream terminated.", "system");
-        }
-        return;
-    }
-
-    if (COMMANDS[cmd]) {
-        addLine(COMMANDS[cmd], 'command-output');
+toggle.onclick = () => {
+    if(playing){
+        music.pause();
+        toggle.textContent = "Audio: Off";
+        playing = false;
     } else {
-        addLine(`Command not found: ${cmd}. Type 'help' for available commands.`, 'error');
+        music.play();
+        toggle.textContent = "Audio: On";
+        playing = true;
     }
-}
-
-input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-        handleCommand(input.value);
-        input.value = '';
-    }
-});
-
-
-document.getElementById('boot').onclick = () => {
-    overlay.classList.add('hidden');
-    music.volume = 0.2;
-    music.play().catch(() => {});
-    
-    addLine("ATLAS OS v2.6.0 [Initializing...]", "system");
-    setTimeout(() => addLine("Loading security modules...", "system"), 400);
-    setTimeout(() => addLine("Connecting to node 127.0.0.1...", "system"), 800);
-    setTimeout(() => {
-        addLine("\nWelcome, Atlas. System is ready.", "system");
-        addLine("Type 'help' to begin.\n", "system");
-    }, 1200);
 };
 
-
-document.addEventListener('click', () => input.focus());
+// Copy function
+function copy(element) {
+    const text = element.innerText;
+    navigator.clipboard.writeText(text);
+    toast.style.display = "block";
+    setTimeout(() => { toast.style.display = "none"; }, 2000);
+}
 </script>
 
 </body>
