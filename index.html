@@ -1,392 +1,200 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Atlas | OSINT Specialist</title>
+<title>Atlas | Terminal</title>
 
 <style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-}
+    :root {
+        --bg: #050508;
+        --cmd-green: #00ff41;
+        --cmd-blue: #0087ff;
+        --text-dim: rgba(0, 255, 65, 0.6);
+    }
 
-html,body{
-height:100%;
-}
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
-:root{
---bg:#0b0b10;
---glass:rgba(255,255,255,0.06);
---glass-border:rgba(255,255,255,0.12);
---text:#ffffff;
---text-soft:rgba(255,255,255,0.65);
---radius:22px;
-}
+    body {
+        background-color: var(--bg);
+        color: var(--cmd-green);
+        font-family: 'Courier New', Courier, monospace;
+        padding: 20px;
+        height: 100vh;
+        overflow: hidden; 
+        display: flex;
+        flex-direction: column;
+    }
 
-body{
-font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-background:radial-gradient(circle at 20% 20%, rgba(255,255,255,0.05), transparent 40%),
-radial-gradient(circle at 80% 0%, rgba(120,120,255,0.08), transparent 40%),
-var(--bg);
-color:var(--text);
-min-height:100vh;
-line-height:1.6;
--webkit-font-smoothing:antialiased;
-padding:20px;
-overflow-x:hidden;
-}
+    
+    body::before {
+        content: " ";
+        display: block;
+        position: absolute;
+        top: 0; left: 0; bottom: 0; right: 0;
+        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                    linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+        z-index: 2;
+        background-size: 100% 2px, 3px 100%;
+        pointer-events: none;
+    }
 
-.enter-overlay{
-position:fixed;
-top:0;
-left:0;
-width:100vw;
-height:100vh;
-background:rgba(10,10,15,0.7);
-backdrop-filter:blur(30px);
-display:flex;
-align-items:center;
-justify-content:center;
-z-index:9999;
-transition:opacity .6s ease,visibility .6s ease;
-}
+    #terminal {
+        flex: 1;
+        overflow-y: auto;
+        padding-bottom: 20px;
+        scrollbar-width: none; 
+    }
 
-.enter-overlay.hidden{
-opacity:0;
-visibility:hidden;
-}
+    #terminal::-webkit-scrollbar { display: none; }
 
-.enter-button{
-padding:18px 46px;
-font-size:1.2rem;
-border-radius:999px;
-border:1px solid var(--glass-border);
-background:rgba(255,255,255,0.08);
-color:white;
-backdrop-filter:blur(20px);
-cursor:pointer;
-transition:all .35s ease;
-letter-spacing:2px;
-}
+    .line { margin-bottom: 5px; min-height: 1.2em; white-space: pre-wrap; }
+    .command-output { color: #ffffff; margin-bottom: 10px; }
+    .error { color: #ff5555; }
+    .system { color: var(--cmd-blue); }
 
-.enter-button:hover{
-background:rgba(255,255,255,0.18);
-transform:scale(1.07);
-}
+    .input-area {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: var(--bg);
+        position: relative;
+        z-index: 3;
+    }
 
-.music-toggle{
-position:fixed;
-top:20px;
-right:20px;
-background:var(--glass);
-border:1px solid var(--glass-border);
-backdrop-filter:blur(20px);
-color:white;
-padding:10px 18px;
-border-radius:999px;
-cursor:pointer;
-font-size:.9rem;
-transition:.3s ease;
-z-index:1000;
-}
+    .prompt { color: var(--cmd-blue); font-weight: bold; }
 
-.music-toggle:hover{
-background:rgba(255,255,255,0.15);
-}
+    #user-input {
+        background: transparent;
+        border: none;
+        color: var(--cmd-green);
+        font-family: inherit;
+        font-size: 1rem;
+        outline: none;
+        width: 100%;
+    }
 
-.container{
-max-width:1100px;
-margin:auto;
-}
+    .enter-overlay {
+        position: fixed;
+        inset: 0;
+        background: black;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
-header{
-text-align:center;
-padding:80px 20px 50px;
-}
+    .enter-overlay.hidden { display: none; }
 
-.profile-icon{
-width:140px;
-height:140px;
-margin:0 auto 30px;
-border-radius:50%;
-background:linear-gradient(145deg, rgba(255,255,255,0.25), rgba(255,255,255,0.05));
-backdrop-filter:blur(20px);
-border:1px solid var(--glass-border);
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:60px;
-font-weight:600;
-box-shadow:0 10px 40px rgba(0,0,0,0.6);
-animation:float 6s ease-in-out infinite;
-}
+    .boot-btn {
+        background: transparent;
+        border: 1px solid var(--cmd-green);
+        color: var(--cmd-green);
+        padding: 15px 30px;
+        cursor: pointer;
+        font-family: inherit;
+    }
 
-@keyframes float{
-0%,100%{transform:translateY(0);}
-50%{transform:translateY(-8px);}
-}
-
-h1{
-font-size:3rem;
-font-weight:600;
-letter-spacing:-1px;
-margin-bottom:10px;
-}
-
-.subtitle{
-color:var(--text-soft);
-}
-
-.tagline{
-margin-top:14px;
-color:rgba(255,255,255,0.85);
-font-weight:300;
-}
-
-.cards{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
-gap:28px;
-margin-top:30px;
-}
-
-.card{
-background:var(--glass);
-border-radius:var(--radius);
-padding:30px;
-border:1px solid var(--glass-border);
-backdrop-filter:blur(24px);
-transition:.35s ease;
-}
-
-.card:hover{
-transform:translateY(-6px);
-border-color:rgba(255,255,255,0.25);
-}
-
-.card-title{
-font-size:1.4rem;
-margin-bottom:20px;
-font-weight:500;
-}
-
-.project{
-margin-bottom:16px;
-padding-left:16px;
-border-left:2px solid rgba(255,255,255,0.3);
-}
-
-.project-name{
-font-weight:600;
-}
-
-.project-desc{
-font-size:.95rem;
-color:var(--text-soft);
-}
-
-a{
-color:rgba(255,255,255,0.85);
-text-decoration:none;
-border-bottom:1px solid rgba(255,255,255,0.2);
-}
-
-a:hover{
-opacity:.7;
-}
-
-.contact-grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-gap:14px;
-}
-
-.contact-item{
-background:rgba(255,255,255,0.04);
-border-radius:14px;
-padding:14px;
-border:1px solid rgba(255,255,255,0.08);
-}
-
-.contact-label{
-font-size:.8rem;
-color:var(--text-soft);
-}
-
-.contact-value{
-word-break:break-all;
-}
-
-.skills{
-margin-top:40px;
-padding:40px;
-border-radius:var(--radius);
-background:var(--glass);
-backdrop-filter:blur(24px);
-border:1px solid var(--glass-border);
-text-align:center;
-}
-
-.skills-title{
-margin-bottom:25px;
-font-size:1.6rem;
-}
-
-.skill-list{
-display:flex;
-flex-wrap:wrap;
-justify-content:center;
-gap:12px;
-}
-
-.skill{
-padding:8px 16px;
-border-radius:999px;
-background:rgba(255,255,255,0.06);
-border:1px solid rgba(255,255,255,0.15);
-font-size:.9rem;
-transition:.25s ease;
-}
-
-.skill:hover{
-background:rgba(255,255,255,0.15);
-}
-
-footer{
-text-align:center;
-margin-top:60px;
-color:var(--text-soft);
-font-size:.85rem;
-padding-bottom:20px;
-}
+    .boot-btn:hover { background: var(--cmd-green); color: black; }
 </style>
 </head>
-
 <body>
 
 <div class="enter-overlay" id="overlay">
-<button class="enter-button" id="enter">ENTER</button>
+    <button class="boot-btn" id="boot">INITIALIZE SYSTEM</button>
 </div>
 
 <audio id="music" loop>
-<source src="https://raw.githubusercontent.com/atlasru/biography/main/music.mp3" type="audio/mpeg">
+    <source src="https://raw.githubusercontent.com/atlasru/biography/main/music.mp3" type="audio/mpeg">
 </audio>
 
-<button class="music-toggle" id="toggle">Music</button>
+<div id="terminal">
+    </div>
 
-<div class="container">
-
-<header>
-<div class="profile-icon">A</div>
-<h1>Atlas</h1>
-<p class="subtitle">OSINT Specialist & Security Researcher</p>
-<p class="tagline">Creating tools for security testing and digital investigations</p>
-</header>
-
-<div class="cards">
-
-<div class="card">
-<h2 class="card-title">Projects</h2>
-
-<div class="project">
-<div class="project-name">GhostChat</div>
-<div class="project-desc">Secure anonymous communication platform</div>
-<div class="project-desc">Launch — 06.06.2026</div>
-</div>
-
-<div class="project">
-<div class="project-name">XSIA Mailer</div>
-<div class="project-desc">Automated email sending service</div>
-<span>@xsiamailerbot</span>
-</div>
-
-<div class="project">
-<div class="project-name">GhostSearch</div>
-<div class="project-desc">OSINT tool for fast open-source intelligence discovery</div>
-<a href="https://v0-ghost-search.vercel.app/" target="_blank">v0-ghost-search.vercel.app</a>
-</div>
-
-<div class="project">
-<div class="project-name">Kiro</div>
-<div class="project-desc">AI-powered pentest agent (Closed Beta)</div>
-</div>
-
-</div>
-
-<div class="card">
-<h2 class="card-title">Contact</h2>
-<div class="contact-grid">
-
-<div class="contact-item">
-<div class="contact-label">Email</div>
-<div class="contact-value">a956943@push.tg</div>
-</div>
-
-<div class="contact-item">
-<div class="contact-label">Discord</div>
-<div class="contact-value">atlasru</div>
-</div>
-
-<div class="contact-item">
-<div class="contact-label">qTox</div>
-<div class="contact-value" style="font-size:.8rem;">
-25912FF37A4B8A299BA2C77811EA9D1E94769746A3AB877A10C21E94DE63331D7C3289111BC4
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-
-<div class="skills">
-<h2 class="skills-title">Expertise</h2>
-<div class="skill-list">
-<span class="skill">OSINT</span>
-<span class="skill">Penetration Testing</span>
-<span class="skill">Security Tools</span>
-<span class="skill">AI for Security</span>
-<span class="skill">Digital Forensics</span>
-<span class="skill">Threat Intelligence</span>
-<span class="skill">Automation</span>
-<span class="skill">Privacy</span>
-</div>
-</div>
-
-<footer>
-© 2026 Atlas
-</footer>
-
+<div class="input-area">
+    <span class="prompt">atlas@osint:~$</span>
+    <input type="text" id="user-input" autofocus spellcheck="false">
 </div>
 
 <script>
-const music=document.getElementById("music");
-const overlay=document.getElementById("overlay");
-const enter=document.getElementById("enter");
-const toggle=document.getElementById("toggle");
+const terminal = document.getElementById('terminal');
+const input = document.getElementById('user-input');
+const overlay = document.getElementById('overlay');
+const music = document.getElementById('music');
 
-let playing=false;
-
-enter.onclick=()=>{
-music.volume=0.4;
-music.play().catch(()=>{});
-playing=true;
-overlay.classList.add("hidden");
+const COMMANDS = {
+    help: "Available commands:\n- about: Who is Atlas?\n- projects: Current work & repos\n- contact: Connectivity methods\n- music: Toggle background audio\n- clear: Clear the terminal\n- help: Show this menu",
+    about: "Atlas\nOSINT Specialist & Security Researcher\nSpecialization: Digital investigations, automated threat intel, and tool development.",
+    projects: "Active Projects:\n1. GhostSearch - Intelligence discovery engine\n2. GhostChat - P2P Secure Layer\n3. Kiro - AI Pentest Agent (Closed Beta)",
+    contact: "Connectivity:\n- Email: a956943@push.tg\n- Discord: atlasru\n- qTox: 25912FF37A4B8A299BA2C77811EA9D1E94769746A3AB877A10C21E94DE63331D7C3289111BC4",
+    clear: "CLEAR"
 };
 
-toggle.onclick=()=>{
-if(playing){
-music.pause();
-toggle.textContent="Music Off";
-playing=false;
-}else{
-music.play();
-toggle.textContent="Music On";
-playing=true;
+function addLine(text, type = '') {
+    const line = document.createElement('div');
+    line.className = `line ${type}`;
+    line.innerText = text;
+    terminal.appendChild(line);
+    terminal.scrollTop = terminal.scrollHeight;
 }
+
+function handleCommand(val) {
+    const cmd = val.toLowerCase().trim();
+    addLine(`atlas@osint:~$ ${val}`, 'user-cmd');
+
+    if (cmd === '') return;
+
+    if (cmd === 'clear') {
+        terminal.innerHTML = '';
+        return;
+    }
+
+    if (cmd === 'music') {
+        if (music.paused) {
+            music.play();
+            addLine("Audio stream initialized.", "system");
+        } else {
+            music.pause();
+            addLine("Audio stream terminated.", "system");
+        }
+        return;
+    }
+
+    if (COMMANDS[cmd]) {
+        addLine(COMMANDS[cmd], 'command-output');
+    } else {
+        addLine(`Command not found: ${cmd}. Type 'help' for available commands.`, 'error');
+    }
+}
+
+input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        handleCommand(input.value);
+        input.value = '';
+    }
+});
+
+
+document.getElementById('boot').onclick = () => {
+    overlay.classList.add('hidden');
+    music.volume = 0.2;
+    music.play().catch(() => {});
+    
+    addLine("ATLAS OS v2.6.0 [Initializing...]", "system");
+    setTimeout(() => addLine("Loading security modules...", "system"), 400);
+    setTimeout(() => addLine("Connecting to node 127.0.0.1...", "system"), 800);
+    setTimeout(() => {
+        addLine("\nWelcome, Atlas. System is ready.", "system");
+        addLine("Type 'help' to begin.\n", "system");
+    }, 1200);
 };
+
+
+document.addEventListener('click', () => input.focus());
 </script>
 
 </body>
